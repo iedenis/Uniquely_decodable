@@ -3,7 +3,7 @@
 // Author      :
 // Version     :
 // Copyright   :
-// Description :
+// Description : This program is checking the input code if it uniquely decodable
 //============================================================================
 
 #include <iostream>
@@ -13,12 +13,12 @@
 #include <sstream>
 
 using namespace std;
-std::pair<int, int> set;
 std::vector<std::pair<int, int> > vectorOfSets; //vector of input alphabet as a set
-std::vector<int> C1; //first set
-std::vector<int> C2; //second set
+std::vector<std::pair<int, int> > C1; //first set
+std::vector<std::pair<int, int> > C2; //second set
 
-bool isPrefix(pair<int, int> p1, pair<int, int> p2, vector<int> &vec) {
+bool isPrefix(pair<int, int> p1, pair<int, int> p2,
+		vector<pair<int, int>> &vec) {
 	int v1 = 1;
 	int v2 = 1;
 	int minLength;
@@ -39,10 +39,14 @@ bool isPrefix(pair<int, int> p1, pair<int, int> p2, vector<int> &vec) {
 			return false;
 	}
 	v1 = minLength | 1;
-	vec.push_back(v1 & ((p1.first > p2.first) ? p1.second : p2.second));
+	vec.push_back(
+			make_pair(minLength,
+					v1 & ((p1.first > p2.first) ? p1.second : p2.second)));
 	return true;
 }
-
+void printPair(pair<int,int>a){
+	cout<<"("<<a.first<<","<<a.second<<")";
+}
 std::pair<int, int> parse(std::string &str) {
 	std::istringstream st(str);
 	string first;
@@ -72,14 +76,30 @@ int main(int argc, char *argv[]) {
 		}
 	file.close();
 
-	isPrefix(vectorOfSets[0], vectorOfSets[1], C1);
-	isPrefix(make_pair(4, 15), make_pair(2, 3), C1);
-	for(std::vector<int>::  iterator it = C1.begin(); it != C1.end(); ++it) {
-	    std::cout << *it;
+	for (std::vector<pair<int, int> >::iterator it = vectorOfSets.begin();
+			it != vectorOfSets.end(); ++it) {
+		for (std::vector<pair<int, int> >::iterator iter = it;
+				iter != vectorOfSets.end(); ++iter) {
+
+			if ((iter + 1) != vectorOfSets.end()) {
+				isPrefix(*it, *(iter + 1), C1);
+			}
+		}
 	}
 
-//alphabet.push_back(make_pair(1, 5));
-//cout<<alphabet[0].second<<endl;
+	for (std::vector<pair<int, int> >::iterator it = vectorOfSets.begin();
+			it != vectorOfSets.end(); ++it) {
+		for (std::vector<pair<int, int> >::iterator iter = C1.begin();
+				iter != C1.end(); ++iter) {
+			isPrefix(*it, *iter, C2);
+		}
+	}
+
+	for (std::vector<pair<int, int> >::iterator iter = C2.begin();
+			iter != C2.end(); ++iter) {
+		printPair(*iter);
+	}
+
 	return 0;
 }
 
