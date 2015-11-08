@@ -11,12 +11,22 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <bitset>
 
 using namespace std;
 std::vector<std::pair<int, int> > vectorOfSets; //vector of input alphabet as a set
 std::vector<std::pair<int, int> > C1; //first set
 std::vector<std::pair<int, int> > C2; //second set
 
+bool contains(vector<pair<int, int>> &vec, pair<int, int> elem) {
+	for (std::vector<pair<int, int> >::iterator iter = vec.begin();
+			iter != vec.end(); ++iter) {
+		if (*iter == elem)
+			return true;
+	}
+	return false;
+
+}
 bool isPrefix(pair<int, int> p1, pair<int, int> p2,
 		vector<pair<int, int>> &vec) {
 	int v1 = 1;
@@ -39,13 +49,17 @@ bool isPrefix(pair<int, int> p1, pair<int, int> p2,
 			return false;
 	}
 	v1 = minLength | 1;
-	vec.push_back(
-			make_pair(minLength,
-					v1 & ((p1.first > p2.first) ? p1.second : p2.second)));
+	//todo maxlength -minlength
+	int elem = v1 & ((p1.first > p2.first) ? p1.second : p2.second);
+	if (!contains(vec, make_pair(minLength,elem))) {
+		vec.push_back(make_pair(minLength, elem));
+	}
+
 	return true;
 }
-void printPair(pair<int,int>a){
-	cout<<"("<<a.first<<","<<a.second<<")";
+void printPair(pair<int, int> a) {
+	cout << "(" << a.first << ","<< std::bitset<5>(a.second) <<")";
+	//cout << "(" << a.first << "," << a.second << ")";
 }
 std::pair<int, int> parse(std::string &str) {
 	std::istringstream st(str);
@@ -61,6 +75,9 @@ std::pair<int, int> parse(std::string &str) {
 }
 
 int main(int argc, char *argv[]) {
+	//pair <int,int> a= make_pair(4,2);
+	//pair <int , int>b=make_pair(3,2);
+
 	ifstream file;
 	file.open(argv[1]);
 	string myVec;
@@ -86,7 +103,14 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
+	//print C1
+	cout << "C1 vector contains" << endl;
 
+	for (std::vector<pair<int, int> >::iterator iter = C1.begin();
+			iter != C1.end(); ++iter) {
+		printPair(*iter);
+	}
+	cout << endl;
 	for (std::vector<pair<int, int> >::iterator it = vectorOfSets.begin();
 			it != vectorOfSets.end(); ++it) {
 		for (std::vector<pair<int, int> >::iterator iter = C1.begin();
@@ -95,6 +119,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	//print C2
+	cout << "C2 vector contains" << endl;
 	for (std::vector<pair<int, int> >::iterator iter = C2.begin();
 			iter != C2.end(); ++iter) {
 		printPair(*iter);
