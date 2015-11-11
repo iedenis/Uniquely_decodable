@@ -31,11 +31,14 @@ bool isPrefix(pair<int, int> p1, pair<int, int> p2,
 		vector<pair<int, int>> &vec) {
 	int v1 = 1;
 	int v2 = 1;
-	int minLength;
-	if (p1.first < p2.first)
+	int minLength, maxLength;
+	if (p1.first < p2.first) {
 		minLength = p1.first;
-	else
+		maxLength = p2.first;
+	} else {
 		minLength = p2.first;
+		maxLength = p1.first;
+	}
 	for (int i = 0; i < p1.first - 1; i++) {
 		v1 = v1 << 1;
 	}
@@ -43,22 +46,26 @@ bool isPrefix(pair<int, int> p1, pair<int, int> p2,
 	for (int i = 0; i < p2.first - 1; ++i) {
 		v2 = v2 << 1;
 	}
-
+//todo
 	for (int i = minLength; i > 0; i--) {
-		if (!(v1 & p1.second) == (v2 & p2.second))
+		if ((((v1 & p1.second)==0)&& (v2 & p2.second)==0))||((v1&p1.second!=0 && v2&p2.second)!=0)))
 			return false;
 	}
-	v1 = minLength | 1;
+	v1=1;
+	for (int i = 0; i < maxLength-minLength-1; ++i) {
+		v1=(v1<<1)+1;
+	}
+	//v1 = (maxLength-minLength+1) | 1;
 	//todo maxlength -minlength
 	int elem = v1 & ((p1.first > p2.first) ? p1.second : p2.second);
-	if (!contains(vec, make_pair(minLength,elem))) {
-		vec.push_back(make_pair(minLength, elem));
+	if (!contains(vec, make_pair(maxLength-minLength, elem))) {
+		vec.push_back(make_pair(maxLength-minLength, elem));
 	}
 
 	return true;
 }
 void printPair(pair<int, int> a) {
-	cout << "(" << a.first << ","<< std::bitset<5>(a.second) <<")";
+	cout << "(" << a.first << "," << std::bitset<5>(a.second) << ")";
 	//cout << "(" << a.first << "," << a.second << ")";
 }
 std::pair<int, int> parse(std::string &str) {
