@@ -40,33 +40,35 @@ bool isPrefix(pair<int, int> p1, pair<int, int> p2,
 		maxLength = p1.first;
 	}
 	for (int i = 0; i < p1.first - 1; i++) {
-		v1 = v1 << 1;
+		v1 <<= 1;
 	}
 
 	for (int i = 0; i < p2.first - 1; ++i) {
-		v2 = v2 << 1;
+		v2 <<= 1;
 	}
-//todo
 	for (int i = minLength; i > 0; i--) {
-		if ((((v1 & p1.second)==0)&& (v2 & p2.second)==0))||((v1&p1.second!=0 && v2&p2.second)!=0)))
+		if (((((v1 & p1.second) == 0) && ((v2 & p2.second) == 0)))
+				|| ((((v1 & p1.second) != 0)) && ((v2 & p2.second) != 0))) {
+			v1 >>= 1;
+			v2 >>= 1;
+		} else
 			return false;
+
 	}
-	v1=1;
-	for (int i = 0; i < maxLength-minLength-1; ++i) {
-		v1=(v1<<1)+1;
+	v1 = 1;
+	for (int i = 0; i < maxLength - minLength - 1; ++i) {
+		v1 = (v1 << 1) + 1;
 	}
 	//v1 = (maxLength-minLength+1) | 1;
-	//todo maxlength -minlength
 	int elem = v1 & ((p1.first > p2.first) ? p1.second : p2.second);
-	if (!contains(vec, make_pair(maxLength-minLength, elem))) {
-		vec.push_back(make_pair(maxLength-minLength, elem));
+	if (!contains(vec, make_pair(maxLength - minLength, elem))) {
+		vec.push_back(make_pair(maxLength - minLength, elem));
 	}
 
 	return true;
 }
 void printPair(pair<int, int> a) {
 	cout << "(" << a.first << "," << std::bitset<5>(a.second) << ")";
-	//cout << "(" << a.first << "," << a.second << ")";
 }
 std::pair<int, int> parse(std::string &str) {
 	std::istringstream st(str);
@@ -84,7 +86,6 @@ std::pair<int, int> parse(std::string &str) {
 int main(int argc, char *argv[]) {
 	//pair <int,int> a= make_pair(4,2);
 	//pair <int , int>b=make_pair(3,2);
-
 	ifstream file;
 	file.open(argv[1]);
 	string myVec;
@@ -94,8 +95,6 @@ int main(int argc, char *argv[]) {
 	else
 		while (getline(file, myVec)) {
 			vectorOfSets.push_back(parse(myVec));
-			//cout << vectorOfSets[i].first << " " << vectorOfSets[i].second
-			//		<< endl;
 			i++;
 		}
 	file.close();
@@ -132,7 +131,12 @@ int main(int argc, char *argv[]) {
 			iter != C2.end(); ++iter) {
 		printPair(*iter);
 	}
-
+	cout << "\n**************************************" << endl;
+	if (C2.size() > 0)
+		cout << "* The code is not uniquely decodable *" << endl;
+	else
+		cout << "* The code is uniquely decodable     *" << endl;
+	cout << "**************************************" << endl;
 	return 0;
 }
 
