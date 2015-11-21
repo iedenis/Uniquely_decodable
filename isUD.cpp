@@ -1,9 +1,9 @@
-//============================================================================
+//====================================================================================================================
 // Name        : isUD.cpp
 // Author      : Denis Ievlev & Lior Shmuel
 // Copyright   :
-// Description : This program is checking the input code if it is uniquely decodable
-//============================================================================
+// Description : This program checks if the input code (format: (length,decimal representation)) is uniquely decodable
+//====================================================================================================================
 
 #include <iostream>
 #include <vector>
@@ -15,7 +15,7 @@
 std::vector<std::pair<int, int> > vectorOfSets; //vector of input alphabet as a set
 std::vector<std::pair<int, int> > C1; //first set
 std::vector<std::pair<int, int> > C2; //second set
-
+std::vector<std::pair<int, int> > resOfInters; //result of intersection of two sets
 bool contains(std::vector<std::pair<int, int>> &vec, std::pair<int, int> elem) {
 	for (std::vector<std::pair<int, int> >::iterator iter = vec.begin();
 			iter != vec.end(); ++iter) {
@@ -24,7 +24,36 @@ bool contains(std::vector<std::pair<int, int>> &vec, std::pair<int, int> elem) {
 	}
 	return false;
 }
+bool intersection(std::vector<std::pair<int, int>> &v1,
+		std::vector<std::pair<int, int>> &v2,
+		std::vector<std::pair<int, int>> &res) {
+	for (std::vector<std::pair<int, int> >::iterator iter = v1.begin();
+			iter != v1.end(); ++iter) {
+		if (contains(v2, (std::pair<int, int>) *iter)) {
+			res.push_back(*iter);
+		}
+	}
+	if (res.size() > 0)
+		return true;
+	else
+		return false;
+}
+/*
+ * Prints one pair of the set
+ * The first number represents the length of the word
+ * The second number represents the word in decimal
+ */
+void printPair(std::pair<int, int> a) {
+	std::cout << "(" << a.first << "," << std::bitset<5>(a.second) << ")";
+}
 
+void printVector(std::vector<std::pair<int, int>> &vec) {
+	for (std::vector<std::pair<int, int> >::iterator iter = vec.begin();
+			iter != vec.end(); ++iter)
+		printPair(*iter);
+	std::cout<<std::endl;
+
+}
 bool isPrefix(std::pair<int, int> p1, std::pair<int, int> p2,
 		std::vector<std::pair<int, int>> &vec) {
 	int v1 = 1, v2 = 1;
@@ -64,20 +93,13 @@ bool isPrefix(std::pair<int, int> p1, std::pair<int, int> p2,
 	for (int i = 0; i < maxLength - minLength - 1; ++i) {
 		v1 = (v1 << 1) + 1;
 	}
-	int elem = v1 & ((p1.first > p2.first) ? p1.second : p2.second);
-	if (!contains(vec, std::make_pair(maxLength - minLength, elem))) {
-		vec.push_back(std::make_pair(maxLength - minLength, elem));
+	int sufix = v1 & ((p1.first > p2.first) ? p1.second : p2.second);
+	if (!contains(vec, std::make_pair(maxLength - minLength, sufix))) {
+		vec.push_back(std::make_pair(maxLength - minLength, sufix));
 	}
 	return true;
 }
-/*
- * Prints one pair of the set
- * The first number represents the length of the word
- * The second number represents the word in decimal
- */
-void printPair(std::pair<int, int> a) {
-	std::cout << "(" << a.first << "," << std::bitset<5>(a.second) << ")";
-}
+
 /*
  * Parsing the input string.
  */
@@ -104,10 +126,11 @@ int main(int argc, char *argv[]) {
 	std::ifstream file;
 	file.open(argv[1]);
 	std::string myVec; //input lines
-	if (!file.is_open())
+	if (!file.is_open()) {
 		std::cerr << "Can't open the file. Please check the path to the file"
 				<< std::endl;
-	else
+		exit(1);
+	} else
 		while (getline(file, myVec)) {
 			if (myVec != "") {
 				vectorOfSets.push_back(parse(myVec));
@@ -124,14 +147,23 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	//print C1
-	std::cout << "C1 vector contains" << std::endl;
+	//print vector vectorOfSets
+	std::cout
+			<< "-----------------------------------------------------------------------------"
+			<< std::endl;
+	std::cout << "The given set of codewords is:" << std::endl;
+	printVector(vectorOfSets);
 
-	for (std::vector<std::pair<int, int> >::iterator iter = C1.begin();
-			iter != C1.end(); ++iter) {
-		printPair(*iter);
-	}
-	std::cout << std::endl;
+	//print vector C1
+	std::cout
+			<< "-----------------------------------------------------------------------------"
+			<< std::endl;
+	std::cout
+			<< "C1 set (all sufixes of codewords where the prefix of \nthe codeword is another codeword) contains:"
+			<< std::endl;
+
+	printVector(C1);
+
 	for (std::vector<std::pair<int, int> >::iterator it = vectorOfSets.begin();
 			it != vectorOfSets.end(); ++it) {
 		for (std::vector<std::pair<int, int> >::iterator iter = C1.begin();
@@ -139,19 +171,29 @@ int main(int argc, char *argv[]) {
 			isPrefix(*it, *iter, C2);
 		}
 	}
+	std::cout
+			<< "-----------------------------------------------------------------------------"
+			<< std::endl;
 
-	//print C2
-	std::cout << "C2 vector contains" << std::endl;
-	for (std::vector<std::pair<int, int> >::iterator iter = C2.begin();
-			iter != C2.end(); ++iter) {
-		printPair(*iter);
-	}
+	//print vector C2
+	std::cout
+			<< "C2 set (the unioun of codewords in C1 vector where the words are prefix of \nanother codeword in vector C and contrariwise)  contains:"
+			<< std::endl;
+	printVector(C2);
+	std::cout
+			<< "-----------------------------------------------------------------------------"
+			<< std::endl;
+
 	std::cout << "\n**************************************" << std::endl;
-	if (C2.size() > 0)
+	if (intersection(vectorOfSets, C2, resOfInters))
 		std::cout << "* The code is not uniquely decodable *" << std::endl;
 	else
 		std::cout << "* The code is uniquely decodable     *" << std::endl;
 	std::cout << "**************************************" << std::endl;
+	std::cout << "\nIntersection of input vector of codewords and C2 vector is: "
+			<< std::endl;
+	printVector(resOfInters);
+
 	return 0;
 }
 
